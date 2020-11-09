@@ -1,0 +1,2 @@
+# bias_factor: the bias is modeled as b(z) = bias_factor/Growth(z)
+bias_factor = 0.84
