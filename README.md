@@ -1,8 +1,21 @@
 
+# Fishermathica
 
-Package: CosmologyFunctions
 
-APeffect :: Option for observed power spectrum. Activates or deactivates the Alcock-Pazcynski effect, Default: True
+A Mathematica code to perform Fisher Matrix forecasts for photometric and spectroscopic galaxy surveys.
+
+This is a fresh commit github to avoid carrying around a lot of commit history and old tracked files. The full commit history (570 commits) can be found on 
+https://gitlab.com/santiagocasas/FisherMatrixTools.
+
+## Release 0.1
+Proper documentation and end-to-end examples will be added in the next full release.
+
+
+## Packages documentation
+
+### Package: CosmologyFunctions
+
+`APeffect :: Option for observed power spectrum. Activates or deactivates the Alcock-Pazcynski effect, Default: True
 
 
 complementParamValues ::  complementParamValues[extrapars_,functionsym_, 
@@ -164,13 +177,13 @@ $partesta :: debug variable
 $pscosmoopts :: Boolean options for cosmology and power spectrum, usually: lcdmBool->True and linearBool->True
 
 
-$pslinearopt :: Boolean option  specifying linear (True) or nonlinear (False) power spectrum calculation
+$pslinearopt :: Boolean option  specifying linear (True) or nonlinear (False) power spectrum calculation `
 
 
 
-Package: FisherTools
+### Package: FisherTools
 
-centralZbin :: Gives the central value of the bin, when the input is the bin index.
+`centralZbin :: Gives the central value of the bin, when the input is the bin index.
                Form: centralZbin[index_number,list_zbins] = number
 
 complementOptionValues :: Form: complementOptionValues[customOptsList_,internalFunctOptsList_,externalFunctOptsList_, options: returnList->'CustomComplementOptions', filterCosmoPars->'All'].
@@ -281,7 +294,6 @@ insertColumn :: insert vector as a column at position pos.
 insertRow :: insert vector as a row at position pos.
              Form: insertRow[matrix,vector,pos] = matrix
 
-                                                                     t
 jacobianTransform :: Transform a Matrix by using a Jacobian Matrix: J .M.J 
                                                                       Form: jacobianTransform[matrix,jacobianmatrix] = matrix
 
@@ -425,7 +437,9 @@ volumeEffective :: calculate the 'effective volume' used in the Fisher Matrix ca
                    using the ndens effective and the observed power spectrum
 
 volumeSurvey :: gives the volume of a survey in the central value zmid of the redshift bins given by zbino
-                volumeSurvey[zmid,zbino]=number. Needs to specify globally the covered sky fraction of the survey with Global`volumeEuclid
+                volumeSurvey[zmid,zbino]=number. Needs to specify globally the covered sky fraction of the survey with Global
+                
+volumeEuclid
 
 volumeZbin :: Gives the volume contained in a z bin given by z1<z<z2. 
               Uses the angular diameter distance and H0 from the CosmologyFunctions package
@@ -473,5 +487,5 @@ $ndensGalZFuncGlobal :: The global galaxy number density interpolation function 
 $numbGalaxiesGlob :: Global list with number of galaxies for each redshift bin
 
 
-$zbinGlobal :: Global list with the values of the intervals for the redshift bins
+$zbinGlobal :: Global list with the values of the intervals for the redshift bins`
 
