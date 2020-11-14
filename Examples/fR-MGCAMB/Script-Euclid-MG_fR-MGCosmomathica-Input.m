@@ -14,7 +14,7 @@ notebookdir=If[aa=DirectoryName@$InputFileName; aa=="", NotebookDirectory[], aa]
 SetDirectory[notebookdir]
 
 
-$globalpackageparallel=True
+$globalpackageparallel=False
 
 
 Get["0-Initialization.m"]
@@ -24,7 +24,10 @@ Get["0-Initialization.m"]
 (*Run type specifications*)
 
 
-$stepstring="-WP6-HS5-SteM4-int1-";   (* String identifying this run and configuration of Fisher matrix analysis*)
+$fiducialstring="HS5"
+
+
+$stepstring="-WP6-"<>$fiducialstring<>"-common-version-";   (* String identifying this run and configuration of Fisher matrix analysis*)
 
 
 $dateshort=DateString["ISODate"]    (*Date used in Results folder name*)
@@ -37,10 +40,10 @@ $debugPrint=False;      (* If set to True, intermediate quantities inside packag
 $justAnalysys=False;   (*If set to True, import Fishers and run postprocessing analysis only *)
 
 
-inputsfolder=notebookdir<>"../"<>"Input/";
+inputsfolder="/local/home/scasas/CosmoProjects/EuclidIST/TWG-Forecasts-WP6/WP6-InputFiles/";
 
 
-inputDataDir=inputsfolder<>"WP6-fofR-commonInput-Cosmomathica-InputFiles-baseline_cosmology-DirectPk--Mnu_0p06-HS5/"
+inputDataDir=inputsfolder<>"WP6-fofR-commonInput-Cosmomathica-CommonInputFiles-baseline_cosmology-DirectPk--Mnu_0p06-"<>$fiducialstring<>"/"
 
 
 (* ::Section:: *)
@@ -67,9 +70,6 @@ Get["2-LoadInputFiles-SteM.m"]
 (*Load survey specifications and set other survey parameters*)
 
 
-myInterrupt[]
-
-
 $surveychosen="Euclid"
 
 
@@ -86,7 +86,7 @@ $zintepoints
 myInterrupt[]
 
 
-(*Get["4-GC-FisherRun.m"]*)
+Get["4-GC-FisherRun.m"]
 
 
 myInterrupt[]
