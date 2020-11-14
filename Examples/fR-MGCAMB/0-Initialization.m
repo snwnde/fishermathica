@@ -9,15 +9,12 @@
 
 
 Switch[ToString@RunThrough["whoami",""],
-"casas",
-cosmomathicadir="/remote/pi213c/casas/cosmomathica/";
-fishertoolsdir="/remote/pi213c/casas/FisherMatrix/";,
 "santiago",
 cosmomathicadir="/home/santiago/CosmoProjects/cosmomathica/";
-fishertoolsdir="/home/santiago/CosmoProjects/FisherMatrixTools/";,
+fishertoolsdir="/home/santiago/CosmoProjects/fishermathica/";,
 "scasas",
 cosmomathicadir="/local/home/scasas/CosmoProjects/cosmomathica/";
-fishertoolsdir="/local/home/scasas/CosmoProjects/FisherMatrixTools/";
+fishertoolsdir="/local/home/scasas/CosmoProjects/fishermathica/";
 ];
 
 
