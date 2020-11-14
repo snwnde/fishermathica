@@ -57,6 +57,8 @@ Form:logarithmicDivisions[{x,y},n]"
 
 tentox::usage="Form: tentox=(10^#)&; Pure function that computes 10^x."
 
+integratetrapz::usage="Simple trapezoidal rule integration of a 2-d array, x and y points."
+
 removeDuplicateXY::usage="Remove from a table of X-Y pairs, all the rows in which X is repeated."
 
 twoArgumentsCheck::usage="Form: twoArgumentsCheck[txarg__,bool_]. Checks if the arguments passed as txarg are composed of one or two arguments,
@@ -272,6 +274,9 @@ Interrupt[]]
 tentox=(10^#)&;
 
 logarithmicDivisions[{x_?Positive,y_?Positive},n_Integer/;n>1]:= (x (y/x)^Range[0,1,1/(n-1)])
+
+
+integratetrapz[table_?ListQ]:=(Differences[#1].MovingAverage[#2, 2] & @@ Transpose[table])
 
 
 removeDuplicateXY[tableXY_List]:=Map[First,GatherBy[tableXY,First],1]

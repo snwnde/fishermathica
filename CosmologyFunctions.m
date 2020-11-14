@@ -232,6 +232,10 @@ BAOdamping::usage="BAOdamping[zz_, kk_, muu_, opts:OptionsPattern[powerSpectrum]
 BAO damping term for GCsp. Depending on the value of $kdependentGrowth,
 there are two different approaches."
 
+pthetathetaMoments::usage="function to compute fgrowth moments of Pk. pthetathetaMoments[zz, mom_?IntegerQ, opts]"
+sigmavNLNew::usage="function to compute the sigma_v function. sigmavNLNew[z, k, mu, opts]."
+sigmapNLNew::usage="function to compute the sigma_p function. sigmapNLNew[z, opts]."
+
 
 epsilonChangeParameter::usage="Form: epsilonChangeParameter[par_, epsi_:$epsilonstep, paropts_:$paramoptions].
 Gives value of parameter par, changed by an epsilon epsi, according to the fiducials in paropts."
@@ -962,6 +966,7 @@ setExternalCosmoInterpolatingFunctions[opts:OptionsPattern[]]:=Block[{
   psopt=OptionValue[externalPowerSpectrumInput],
   psderivsopt=OptionValue[externalPowerSpectrumDerivativesInput],
   pknwopt=OptionValue[externalPowerSpectrumNoWiggleInput],
+  pknwderivsopt=OptionValue[externalPowerSpectrumNoWiggleDerivativesInput],
   sigopt=OptionValue[externalSigmaLensingInput],
   sigderivsopt=OptionValue[externalSigmaLensingDerivativesInput]
 },
@@ -1942,7 +1947,7 @@ Options[fGrowthRate]=$paramoptions~Join~$modcosmoopt~Join~{growthDerivative->Fal
   externalFile->False, kdependentGrowth:>$kdependentGrowth,
 fixGrowthScalek:>$fkfix, fGammaFit->$fGamma, solveDifferentialEquation -> False}
 (*added memoization of fGrowthRate*)
-fGrowthRate[zk__,opts:OptionsPattern[]]:=fGrowthRate[zk,opts]=Block[{lcdmOpt,paropts, fromDeriv,kdep, zval,
+fGrowthRate[zk__?NumericQ,opts:OptionsPattern[]]:=fGrowthRate[zk,opts]=Block[{lcdmOpt,paropts, fromDeriv,kdep, zval,
   kval, kscale, kuf, puf, return, gamma, solveND},
 paropts=complementParamValues[{opts},fGrowthRate,returnList->"Complement", filterCosmoPars->True];
 lcdmOpt=OptionValue[lcdmBool];
@@ -2630,7 +2635,9 @@ powerSpectrum::extopts="Inconsistent options chosen, lcdmBool=False, but externa
 Options[powerSpectrum]=$paramoptions~Join~$pscosmoopts~Join~{spectrumMethod->"Transfer", sigma8reference->$sigma8reference,
   externalFile->False, kdependentGrowth:>$kdependentGrowth, units:>$internalPkUnits}
 
-powerSpectrum[z_?NumericQ,k_,opts:OptionsPattern[]]:=Block[{paropts, psmethod, extfile, s8, hvalue, unitsPk,
+powerSpectrum[z_?NumericQ,k_?NumericQ,opts:OptionsPattern[]]:=
+powerSpectrum[z,k,opts]=
+Block[{paropts, psmethod, extfile, s8, hvalue, unitsPk,
   lcdmOpt, parcosmopts, kuf, puf, pk},
 
 paropts=complementParamValues[{opts},powerSpectrum, returnList->"Complement"];
@@ -2965,7 +2972,9 @@ Options[observedPowerSpectrum]=$paramoptions~Join~$pscosmoopts~Join~{spectrumMet
   APeffect->$APeffectBool,kdependentGrowth:>$kdependentGrowth, externalFile->False, varyZdependentparameter->{False,Plus,1},
   zdepFunctionsCosmoVariation->False }
 $shaParVarInZdep
-observedPowerSpectrum[zred_?NumericQ,k_,mu_,opts:OptionsPattern[]]:=Block[{paroptis, fidoptis, zoptis, linearRec, kAP,muAP,effAP,baoterm, powspec, powopts, kapopts, kaiserterm, s8z, s8zpw, dvar, dvarsign, dvarcoeff, lorentzFoG, gmudamping, powspecDW, powspecNW},
+observedPowerSpectrum[zred_?NumericQ,k_,mu_,opts:OptionsPattern[]]:=
+observedPowerSpectrum[zred,k,mu,opts]=
+Block[{paroptis, fidoptis, zoptis, linearRec, kAP,muAP,effAP,baoterm, powspec, powopts, kapopts, kaiserterm, s8z, s8zpw, dvar, dvarsign, dvarcoeff, lorentzFoG, gmudamping, powspecDW, powspecNW},
 paroptis=complementParamValues[{opts},observedPowerSpectrum, returnList->"Complement", filterCosmoPars->True];
 fidoptis=complementParamValues[{opts},observedPowerSpectrum, returnList->"Fiducials", filterCosmoPars->True];
 powopts=complementParamValues[{opts},powerSpectrum, returnList->"Complement"];
@@ -3043,7 +3052,9 @@ baoterm*powspecDW*lorentzFoG*kaiserterm*errorZ[kAP,muAP,zred,zoptis]
 
 
 Options[FingersOfGod]={ignoreSigmaPVCosmoDependence->True}
-FingersOfGod[zz_, kk_, muu_, opts:OptionsPattern[{powerSpectrum, FingersOfGod}]]:=Block[{lorentzfog,brack, paroptis,
+FingersOfGod[zz_, kk_, muu_, opts:OptionsPattern[{powerSpectrum, FingersOfGod}]]:=
+FingersOfGod[zz, kk, muu, opts]=
+Block[{lorentzfog,brack, paroptis,
   fidoptis, zoptis, sgopts, ignS=OptionValue[ignoreSigmaPVCosmoDependence]},
 paroptis=complementParamValues[{opts},powerSpectrum, returnList->"Complement", filterCosmoPars->True];
 fidoptis=complementParamValues[{opts},powerSpectrum, returnList->"Fiducials", filterCosmoPars->True];
@@ -3063,7 +3074,9 @@ Return[lorentzfog]
 
 
 Options[BAOdamping]={ignoreSigmaPVCosmoDependence->True}
-BAOdamping[zz_, kk_, muu_, opts:OptionsPattern[{powerSpectrum, BAOdamping}]]:=Block[{gmu, paroptis, fidoptis,
+BAOdamping[zz_, kk_, muu_, opts:OptionsPattern[{powerSpectrum, BAOdamping}]]:=
+BAOdamping[zz, kk, muu, opts]=
+Block[{gmu, paroptis, fidoptis,
   zoptis, sgopts, ignS=OptionValue[ignoreSigmaPVCosmoDependence]},
 paroptis=complementParamValues[{opts},powerSpectrum, returnList->"Complement", filterCosmoPars->True];
 fidoptis=complementParamValues[{opts},powerSpectrum, returnList->"Fiducials", filterCosmoPars->True];
@@ -3081,33 +3094,34 @@ Return[gmu]
 ];
 
 
-pthetathetaMoments[zz_, mom_?IntegerQ, opts:OptionsPattern[powerSpectrum]]:=pthetathetaMoments[zz,mom, opts]=Block[{paroptis, ptt, fmom},
+pthetathetaMoments[zz_, mom_?IntegerQ, opts:OptionsPattern[powerSpectrum]]:=
+pthetathetaMoments[zz,mom, opts]=Block[{paroptis, ptt, fmom, logkrange, steps=100, ff, pp, table},
 paroptis=complementParamValues[{opts},powerSpectrum, returnList->"Complement", filterCosmoPars->True];
  If[$kdependentGrowth==True,
   fmom=(fGrowthRate[zz, #, paroptis]^mom &);
   ,
   fmom=(fGrowthRate[zz, paroptis]^mom &);
   ];
-	ptt=(1/(6 Pi^2)) * NIntegrate[powerSpectrum[zz, kk, opts]*fmom[kk], {kk, $kminRef, $kmaxRef}];
+  logkrange = logarithmicDivisions[{$kminRef, $kmaxRef}, steps];
+  ff=fmom[#]&/@logkrange;
+  pp=powerSpectrum[zz, #, paroptis]&/@logkrange;
+  table=Transpose[{logkrange,pp*ff*(1/(6 Pi^2))}];
+  ptt=integratetrapz[table];
 	Return[ptt]
 ];
-
-
 
 sigmavNLNew[zz_, kk_, muu_, opts:OptionsPattern[powerSpectrum]]:=Block[{sv, f0, f1, f2},
  f0 = pthetathetaMoments[zz,0, opts];
  f1 = pthetathetaMoments[zz,1, opts];
  f2 = pthetathetaMoments[zz,2, opts];
- sv=Sqrt[f1+ 2*muu^2*f1 + muu^2*f2];
+ sv=Sqrt[f0+ 2*muu^2*f1 + muu^2*f2];
  Return[sv]
 ];
 
 sigmapNLNew[zz_, opts:OptionsPattern[powerSpectrum]]:=sigmapNLNew[zz, opts]=Block[{sp},
- sp=Sqrt[pthetathetaMoments[zz, 1, opts]];
+ sp=Sqrt[pthetathetaMoments[zz, 2, opts]];
  Return[sp]
 ];
-
-
 
 pthetathetaInt[zz_, opts:OptionsPattern[powerSpectrum]]:=pthetathetaInt[zz, opts]=Block[{optis},
   (1/(6 Pi^2)) * NIntegrate[powerSpectrum[zz, kk, opts], {kk, $kminRef, $kmaxRef}]
