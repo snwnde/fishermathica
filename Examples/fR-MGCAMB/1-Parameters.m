@@ -8,13 +8,19 @@
 (*Numerical Parameters*)
 
 
-interpOrd=1; (* interpolation order*)
+$interpOrd=1; (* interpolation order*)
 
 
-interpMeth="Spline";  (* interpolation method for input files*)
+$interpMeth="Spline";  (* interpolation method for input files*)
 
 
-SetOptions[Interpolation, InterpolationOrder->interpOrd, Method->interpMeth]
+SetOptions[Interpolation, InterpolationOrder->$interpOrd, Method->$interpMeth]
+
+
+Options[NIntegrate]
+
+
+SetOptions[NIntegrate, AccuracyGoal->7, PrecisionGoal->Automatic, MinRecursion->2, MaxRecursion->1000, WorkingPrecision->Floor[$MachinePrecision], Method->{Automatic,"SymbolicProcessing"->0}]
 
 
 (* ::Section::Bold:: *)
@@ -51,7 +57,7 @@ mysigmap = Sqrt[pthetathetaInt[$zmeansurvey]]/sigma8ofZ[$zmeansurvey]*)
 (*(mysigmap-sigmapnlref)/sigmapnlref*100*)
 
 
-Get[inputsfolder<>"GenerationsParameters-HS5.wl"]
+Get[inputsfolder<>"GenerationsParameters-"<>$fiducialstring<>".wl"]
 
 
 NotebookDirectory[]
@@ -63,7 +69,7 @@ NotebookSave[]
 (*Intrinsic Alignment*)
 
 
-$varyIAparams=True;
+$varyIAparams=False;
 
 
 $includeIAterms=True;
