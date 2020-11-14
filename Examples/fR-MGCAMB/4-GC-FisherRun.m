@@ -4,31 +4,10 @@
 (*Fisher matrix blocks and structure*)
 
 
-$resultsDirectoryGC=mkDirectory[notebookdir<>"/Results-GCsp-"<>dateshort<>"-"<>$stepstring<>"/"]
+$resultsDirectoryGC=mkDirectory[notebookdir<>"/Results-GCsp-"<>"-"<>$stepstring<>"/"]
 
 
-$newrecipelinear=False;  (*nonlinear recipe if False, reduces to linear recipe if True*)
-
-
-kmaxtest=0.30;     (*maximum k scale in Fisher *)
-
-
-SetOptions[dObsPowerDZpi, stencilpoints->$stencilpoints]
-
-
-(*SetOptions[NIntegrate, Method->{Automatic,"SymbolicProcessing"->0}, AccuracyGoal->12, PrecisionGoal->Automatic, MaxRecursion->1000, MinRecursion\[Rule]2]*)
-
-
-$zdependderivatives="numerical";  (*numerical or analytical derivatives of z-dependent variables*)
-
-
-
-
-
-setPowerSpectrumRelatedSpecs[dzRelativeVelocityError->0.001, APeffect->True, zdepFunctionsCosmoVariation->True]
-
-
-setFisherKmaxValues[maxFisherKCut->kmaxtest, fisherKCutMethod->1];
+$zdependderivatives="numerical";
 
 
 epsizstepdenominator=10000;
@@ -41,19 +20,13 @@ setNumericalEpsilon[$epsilonstep, epsilonStepForZdependentParameters->$epsilonzs
 $stencilpoints=5;    (* number of points for the stencil of the numerical derivative of z-dependent quantities *)
 
 
+SetOptions[dObsPowerDZpi, stencilpoints->$stencilpoints]
+
+
 $onlyzdeppars=False;
 
 
-$shaParVarInZdep
-
-
 zdepVariablesVector={d8,d1};
-
-
-SetOptions[observedPowerSpectrum, zdepFunctionsCosmoVariation->$shaParVarInZdep]
-
-
-Options[RAPfunction]
 
 
 FisherBlockBuilder[zdepVariablesVector, 
@@ -66,35 +39,20 @@ Print["z-dependent Vector: "]
 Print[$zdependDerivVector];
 
 
-GCfisherint$precision=11;
+(*GCfisherint$precision=11;
 GCfisherint$accuracy=11;
-GCfisherint$maxrecursion=1000;
+GCfisherint$maxrecursion=1000;*)
 
 
-SetOptions[NIntegrate, PrecisionGoal->Automatic, AccuracyGoal->GCfisherint$accuracy, MinRecursion->2, 
-MaxRecursion->GCfisherint$maxrecursion, Method->{Automatic,"SymbolicProcessing"->0},  WorkingPrecision->Floor[$MachinePrecision]]
+(*SetOptions[NIntegrate, PrecisionGoal->Automatic, AccuracyGoal->GCfisherint$accuracy, MinRecursion->2, 
+MaxRecursion->GCfisherint$maxrecursion, Method->{Automatic,"SymbolicProcessing"->0},  WorkingPrecision->Floor[$MachinePrecision]]*)
 
 
-SetOptions[FingersOfGod, ignoreSigmaPVCosmoDependence->True]
+$externalPowerSpectrumInterpolatingFunction
 
 
-SetOptions[BAOdamping, ignoreSigmaPVCosmoDependence->True]
-
-
-?observedPowerSpectrum
-
-
-powerSpectrum[0.88,0.1]
-
-
-observedPowerSpectrum[1.1,0.1,0.94]
-
-
-$zdependderivatives
-
-
-kbinning="kbin_"<>fileinputkbinning
-interpolstr="interp_"<>interpInputTabs<>"_ord_"<>ToString[fiIO]
+kbinning="kbin_"
+interpolstr=interpolParticularString
 zderivativesstr=$APoptString<>"_"<>$zdependderivatives<>"_lnHlnDalnfs8lnbs8_"<>(ToString@$stencilpoints)<>"pt_sten"
 epszstr=replaceStringPoint[epsizstepdenominator, "epsizd"]
 epsshstr=replaceStringPoint[$epsilonstep, "epsish"]
@@ -105,74 +63,6 @@ $paramoptions
 
 
 (*myInterrupt[]*)
-
-
-(* ::Section:: *)
-(*Make Unit Tests*)
-
-
-$debugPrint=False;
-
-
-$epsilonstep
-
-
-ztest=(zaverage@($zbinGlobal))[[1]]
-
-
-{kuf, puf} =pkUnitsConverter[$internalPkUnits, hubbleToday[], externalFile->True]
-
-
-ktest=0.2
-
-
-domenico$fG$Table={{0.9485227608155783, 0.9496907924581345, 0.9508347267410132},
-{0.9496907924581345, 0.9496907924581345, 0.9496907924581371},
-{0.9503404283035024, 0.9496907924581345, 0.9490484576585825},
-{0.9496907924581345, 0.9496907924581345, 0.9496907924581345},
-{0.9496907924581345, 0.9496907924581345, 0.9496907924581345},
-{0.9534867206106294, 0.9496907924581345, 0.9459088654373667}}
-
-
-domenico$S8tab={{0.4972351141981523, 0.5000880177647443, 0.5029021150465248},
-{0.501580075991084, 0.5000880177647443, 0.49859903559471336},
-{0.4945356535161819, 0.5000880177647443, 0.5056351286882927},
-{0.49827053378685665, 0.5000880177647443, 0.5019216129582273},
-{0.4950871375870971, 0.5000880177647443, 0.505088897942392},
-{0.5006181171763837, 0.5000880177647443, 0.49959201512024815}}
-
-
-santi$fG$Table=Table[{
-fGrowthRate[ztest, ktest, Par->(Par/.$paramoptions)*(1-$epsilonstep)], 
-fGrowthRate[ztest, ktest], 
-fGrowthRate[ztest, ktest, Par->(Par/.$paramoptions)*(1+$epsilonstep)]}, 
-{Par,$paramnames}]
-
-
-100*(santi$fG$Table-domenico$fG$Table)/domenico$fG$Table
-
-
-$paramsDirectoryNames
-
-
-santi$S8tab=Table[{
-(*Print[Par,"  "];*)
-sigma8ofZ[ztest, Par->(Par/.$paramoptions)*(1-$epsilonstep)], 
-sigma8ofZ[ztest], 
-sigma8ofZ[ztest, Par->(Par/.$paramoptions)*(1+$epsilonstep)]}, 
-{Par,$paramnames}]
-
-
-100*(santi$S8tab-domenico$S8tab)/domenico$S8tab
-
-
-Options[powerSpectrum]
-
-
-$internalPkUnits
-
-
-
 
 
 (* ::Section:: *)
@@ -197,7 +87,7 @@ $zdependDerivVector
 $parampositions
 
 
-krangetest=Exp@Range[Log[hubbleToday[]*$krange[[1]]], Log[hubbleToday[]*$krange[[-1]]], 0.12];
+(*krangetest=Exp@Range[Log[hubbleToday[]*$krange[[1]]], Log[hubbleToday[]*$krange[[-1]]], 0.12];
 krangetest={0.1,0.2};
 If[$computeDerivatives==True,
 
@@ -256,7 +146,7 @@ Print["Exporting:  ", expofilename];
 Export[expofilename, 
 Flatten[derivsTable[zderivativesstr],1], "Table"];
 derivfile[zderivativesstr]=Import[expofilename,"Table"];
-];
+];*)
 
 
 zaverage@$zbinGlobal
@@ -265,27 +155,27 @@ zaverage@$zbinGlobal
 $paramoptions
 
 
-compaTabs[tab_, tabbench_]:=100*(tab-tabbench)/tabbench
+(*compaTabs[tab_, tabbench_]:=100*(tab-tabbench)/tabbench*)
 
 
-santiObsCosmDerivs=Table[{dObsPowerDpi[1.4, 0.1, 0.3, pp, dlnPdpDerivative->True], dObsPowerDpi[1.4,0.2, 0.3, pp, dlnPdpDerivative->True]},{pp,1,6}] 
+(*santiObsCosmDerivs=Table[{dObsPowerDpi[1.4, 0.1, 0.3, pp, dlnPdpDerivative->True], dObsPowerDpi[1.4,0.2, 0.3, pp, dlnPdpDerivative->True]},{pp,1,6}] *)
 
 
-domenicoObsCosmDerivs={{1.6757 ,2.59094},{1.0439, -2.48047},
+(*domenicoObsCosmDerivs={{1.6757 ,2.59094},{1.0439, -2.48047},
 {-3.35459, -2.91231},
 {-0.02749, 0.66669},
 {0.10913, 0.11233},
 {-0.003, 0.026}
-}
+}*)
 
 
-compaTabs[santiObsCosmDerivs, domenicoObsCosmDerivs]
+(*compaTabs[santiObsCosmDerivs, domenicoObsCosmDerivs]*)
 
 
-d8[0.9,0.22,0.44]
+(*d8[0.9,0.22,0.44]*)
 
 
-?dObsPowerDpi
+(*?dObsPowerDpi*)
 
 
 (*LogLinearPlot[dObsPowerDpi[1, kkki, 0., 1,dlnPdpDerivative->True], {kkki, 0.001, 1}, PlotRange\[Rule]Full]
@@ -316,57 +206,6 @@ MYdObsdPi$3 = Import["MYdObsdPi$3.txt", "Table"];*)
 ?powerSpectrum
 
 
-epsilonChangeParameter[hubble, $epsilonstep]
-
-
-epsilonChangeParameter[hubble, -$epsilonstep]
-
-
-powerSpectrum[1.0, 0.2, {hubble->0.677}]
-
-
-{powerSpectrum[1.0, 0.2, {hubble->0.6633}], powerSpectrum[1.0, 0.2],powerSpectrum[1.0, 0.2, {hubble->0.6767}]}
-
-
-$paramoptions
-
-
-?observedPowerSpectrum
-
-
-?powerSpectrum
-
-
-LogLogPlot[{powerSpectrum[0.9,kiki], observedPowerSpectrum[0.9,kiki, 0.01], observedPowerSpectrum[0.9,kiki, 0.5]}, {kiki, 0.0001, 1}, PlotLegends->Automatic]
-
-
-$paramoptions
-
-
-LogLogPlot[{Evaluate@((observedPowerSpectrum[0.9,kiki, #]/powerSpectrum[0.9,kiki])&/@{0.0,0.1,0.2,0.5,0.7,0.99})}, {kiki, 0.0001, 1}, PlotLegends->Automatic]
-
-
-Options[ndensEffective]
-
-
-ndensEffective[0.9,0.1,0.99]
-
-
-volumeEffective[0.9,0.1,0.99]
-
-
-?volumeEffective
-
-
-$zbinGlobal
-
-
-volumeSurvey[0.9,$zbinGlobal]
-
-
-ClearAll[covMatGC]
-
-
 covMatGC[zv_, kv_, muv_]:=Block[{pref=2*(2 Pi)^3, veffs, pobs, cov},
 veffs= volumeEffective[zv, kv, muv]*volumeSurvey[zv, $zbinGlobal];
 pobs=observedPowerSpectrum[zv,kv,muv];
@@ -385,26 +224,23 @@ ztestaa=0.9;
 mutestaa=0.1;
 
 
-LogLogPlot[{observedPowerSpectrum[ztestaa,kiki, mutestaa]-Sqrt[covMatGC[ztestaa,kiki, mutestaa]], observedPowerSpectrum[ztestaa,kiki, mutestaa],
-observedPowerSpectrum[ztestaa,kiki, mutestaa]+Sqrt[covMatGC[ztestaa,kiki, mutestaa]]}, {kiki, 0.001, 2.}, PlotLegends->Automatic, PlotRange->Full, PlotStyle->{Dashed, Thick, Dashed}]
+(*LogLogPlot[{observedPowerSpectrum[ztestaa,kiki, mutestaa]-Sqrt[covMatGC[ztestaa,kiki, mutestaa]], observedPowerSpectrum[ztestaa,kiki, mutestaa],
+observedPowerSpectrum[ztestaa,kiki, mutestaa]+Sqrt[covMatGC[ztestaa,kiki, mutestaa]]}, {kiki, 0.001, 2.}, PlotLegends->Automatic, PlotRange->Full, PlotStyle->{Dashed, Thick, Dashed}]*)
 
 
 Options[volumeEffective]
 
 
-Cos[0 Degree]
-
-
 LogLogPlot[{kiki*observedPowerSpectrum[ztestaa,kiki, mutestaa]}, {kiki, 0.01, 0.8}, PlotLegends->Automatic(*, PlotRange\[Rule]{60000, 65000}*)]
 
 
-LogLinearPlot[{kiki*Sqrt[covMatGC[ztestaa,kiki, 0.9]]}, {kiki, 0.001, 0.8}, PlotLegends->Automatic(*, PlotRange\[Rule]{60000, 65000}*)]
+(*LogLinearPlot[{kiki*Sqrt[covMatGC[ztestaa,kiki, 0.9]]}, {kiki, 0.001, 0.8}, PlotLegends->Automatic(*, PlotRange\[Rule]{60000, 65000}*)]*)
 
 
-LogLogPlot[{Sqrt[covMatGC[ztestaa,kiki, 0.9]]/observedPowerSpectrum[ztestaa,kiki, 0.9]}, {kiki, 0.001, 3}, PlotLegends->Automatic(*, PlotRange\[Rule]{60000, 65000}*)]
+(*LogLogPlot[{Sqrt[covMatGC[ztestaa,kiki, 0.9]]/observedPowerSpectrum[ztestaa,kiki, 0.9]}, {kiki, 0.001, 3}, PlotLegends->Automatic(*, PlotRange\[Rule]{60000, 65000}*)]*)
 
 
-myInterrupt[]
+
 
 
 (* ::Section:: *)
@@ -421,10 +257,10 @@ Options[NIntegrate]
 (*SetOptions[NIntegrate, Method->{Automatic,"SymbolicProcessing"->0}, AccuracyGoal->12, PrecisionGoal->Automatic, MaxRecursion->1000, MinRecursion\[Rule]2]*)
 
 
-SetOptions[FisherIntegration,functionNIntegrate->NIntegrateInterpolatingFunction]
+SetOptions[FisherIntegration,functionNIntegrate->NIntegrate]
 
 
-Options[NIntegrateInterpolatingFunction]
+(*Options[NIntegrateInterpolatingFunction]*)
 
 
 (*(zaverage@$zbinGlobal)[[1;;3]]*)
@@ -506,19 +342,22 @@ Print["$fisherMatResultID:  "<>$fisherMatResultID]
 ?$fisherCosmoFullChainBlock
 
 
-$fisherCosmoParsBlock[0.9,0.22,0.44]
-
-
-$fisherCosmoParsBlock[0.9,0.22,0.55]
+($fisherCosmoParsBlock[#,k,mu]&/@(zaverage@$zbinGlobal);)//AbsoluteTiming
 
 
 $parampositions
 
 
-MatrixPlot[$fisherCosmoParsBlock[1.1,0.001,0.99]]
+MatrixPlot[$fisherCosmoParsBlock[1.2,0.1,0.99]]
 
 
 (*Interrupt[]*)
+
+
+(*FisherIntTest[$fisherCosmoParsBlock, 1.0, cosmoBlockPkderivatives\[Rule]True]*)
+
+
+FisherMatrixGC[1.0,1,1,$fisherCosmoParsBlock[1.0,k,mu][[1,1]]]
 
 
 If[$justAnalysys==False,
@@ -575,6 +414,12 @@ $numZdependentPars
 $paramoptions
 
 
+$fisherMatrix[[1;;$numZindependentPars,1;;$numZindependentPars]]
+
+
+oneSigmaErrors[$fisherMatrix[[1;;$numZindependentPars,1;;$numZindependentPars]]]
+
+
 shapeErrors=oneSigmaErrors[$fisherMatrix][[1;;$numZindependentPars]]
 
 
@@ -585,6 +430,15 @@ $paramlabels
 
 
 errTab=errorsTableTxt[$paramfidus, shapeErrors, $paramlabels]
+
+
+new={1.4,2.6,4.9,0.29,1.2,0.91}
+
+
+old={1.29,2.20,5.13,0.25,1.38,2.09}
+
+
+Abs[(1-old/new)]*100
 
 
 $paramoptions
