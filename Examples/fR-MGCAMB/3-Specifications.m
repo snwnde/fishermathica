@@ -1,14 +1,5 @@
 (* ::Package:: *)
 
-Options[NIntegrate]
-
-
-SetOptions[NIntegrate, AccuracyGoal->11, PrecisionGoal->Automatic, MinRecursion->2, MaxRecursion->1000, WorkingPrecision->Floor[$MachinePrecision], Method->{Automatic,"SymbolicProcessing"->0}]
-
-
-SetOptions[Interpolation, InterpolationOrder->interpOrd, Method->interpMeth]
-
-
 (* ::Section:: *)
 (*Load survey specifications for GCsp*)
 
@@ -29,6 +20,33 @@ Print["Test numeric output from specs: nz[zbinstart]="<>ToString[$ndensGalZFuncG
 
 
 If[$debugPlots==False, Plot[{$ndensGalZFuncGlobal[zz] ,$biasInterpFunc[zz]/1000}, {zz,(zaverage@$zbinGlobal)[[1]],(zaverage@$zbinGlobal)[[-1]]}, PlotLegends->Automatic]]
+
+
+kmaxFisher=0.30;     (*maximum k scale in Fisher in h/Mpc*)  
+
+
+$newrecipelinear=False;  (*nonlinear recipe if False, reduces to linear recipe if True*)
+
+
+$dzSpectError=0.001;
+
+
+setPowerSpectrumRelatedSpecs[dzRelativeVelocityError->$dzSpectError, APeffect->True, zdepFunctionsCosmoVariation->True]
+
+
+setFisherKmaxValues[maxFisherKCut->kmaxFisher, fisherKCutMethod->1];
+
+
+setKandZMinMaxFixedValues[kminIntegrations->5*10^-5]
+
+
+SetOptions[FingersOfGod, ignoreSigmaPVCosmoDependence->True];
+
+
+SetOptions[BAOdamping, ignoreSigmaPVCosmoDependence->True];
+
+
+SetOptions[observedPowerSpectrum, zdepFunctionsCosmoVariation->$shaParVarInZdep]
 
 
 (* ::Section:: *)
