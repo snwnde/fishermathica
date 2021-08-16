@@ -2011,6 +2011,7 @@ Print["Volume in bin: ", volumeSurvey[zmid,$zbinGlobal], "  number density in bi
 "  Number of galaxies: ", $galaxiesCountInBins[[indz]], "  Total galaxies: ", totalGals];
 
 Global`prog1=Global`prog2=Global`prog3=Global`prog4=Global`prog5=Global`prog6=0;
+$DistributedContexts = "FisherTools`Private`";
 
 time1=First@AbsoluteTiming[$cosmoblock[indz]=ParallelTable[Global`prog1++;FisherMatrixGC[zmid,a,b,fishCosmoBlock[zmid,$kamu][[a,b]]],{a,cosmoblockdims},{b,cosmoblockdims}];];
 If[tempdirBool, Export[tempdir<>"cosmoblock-"<>ToString[indz]<>"-z-"<>ToString[zmid]<>If[comprBool,".mc",".txt"],If[comprBool, Compress@$cosmoblock[indz], $cosmoblock[indz] ],If[comprBool, "String","Table"]]];

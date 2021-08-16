@@ -4,3 +4,5 @@ Old-*
 Examples/*/*Results*
 Examples/*/*InputFiles*
 *interestingplots*
+*.DS_Store
+SelfContainedRun/*InputFiles/

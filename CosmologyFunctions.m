@@ -49,6 +49,7 @@ wDEzFunc::usage="calculate w(z) from a parametrization of w0 and wa Form: wDEzFu
 curvatureSin::usage="Gives the Sinus function depending on the curvature value and sign. For Abs[ok]<=0.001 it returns just the argument x.
 Form: curvatureSin[x,ok]= either (Sinh[x], Sin[x], x)"
 OmegaM0Today::usage="Outputs the value of OmegaM today. Valid options: $paramoptions"
+OmegaR0Today::usage="Outputs the value of OmegaR today. Valid options: $paramoptions"
 OmegaBaryon0Today::usage="Outputs the value of OmegaB (Baryons) today. Valid options: $paramoptions"
 OmegaCDM0Today::usage="Outputs the value of OmegaC (Cold Dark Matter) today. Valid options: $paramoptions"
 OmegaDE0Today::usage="Outputs the value of OmegaDE (Dark Energy or Lambda) today. Valid options: $paramoptions"
@@ -72,7 +73,7 @@ inverseTransform = (10^#)& ;"
 
 
 scalarAmplitude::usage="Returns the value of the scalar amplitude of fluctuations As. Options:
-transformedParameter\[Rule]True : If set to True, the parameter As is obtained by the inverse function of the  transformed parameter.
+transformedParameter\[Rule]True : If set to True, the parameter As is obtained by the inverse function of the transformed parameter.
 See function setORreadTransformedParameters for details."
 transformedParameter::usage="Option for scalarAmplitude. Set to True by default. If set to True, it is assumed that $paramoptions contains a transformed parameter of As"
 
@@ -236,7 +237,6 @@ pthetathetaMoments::usage="function to compute fgrowth moments of Pk. pthetathet
 sigmavNLNew::usage="function to compute the sigma_v function. sigmavNLNew[z, k, mu, opts]."
 sigmapNLNew::usage="function to compute the sigma_p function. sigmapNLNew[z, opts]."
 
-
 epsilonChangeParameter::usage="Form: epsilonChangeParameter[par_, epsi_:$epsilonstep, paropts_:$paramoptions].
 Gives value of parameter par, changed by an epsilon epsi, according to the fiducials in paropts."
 
@@ -341,6 +341,9 @@ in the externalCosmoFunctions options"
 
 linearBool::usage="Option for the package. If set to True, only linear quantities are used for the power spectrum calculation.
 If set to false, nonlinear quantities are used for the power spectrum calculation."
+
+nonlinearBool::usage="Option for the hacked function powerSpectrum. If set to True, Halofit function is used to give nonlinear power spectrum.
+If set to false, linear power spectrum is given."
 
 $lightspeed::usage="Exact speed of light in units of km/s"
 
@@ -511,7 +514,7 @@ externalSigma8ofZInput::usage="Option for setExternalCosmoInterpolatingFunctions
 externalPowerSpectrumNoWiggleInput::usage="Option for setExternalCosmoInterpolatingFunctions"
 externalPowerSpectrumNoWiggleDerivativesInput::usage="Option for setExternalCosmoInterpolatingFunctions"
 
-parameterDirectoriesNames::usage="Option for the function getCosmoParameterFileName, sets the correct order of the directories which contain the external input files ffor the corresponding cosmological parameters.
+parameterDirectoriesNames::usage="Option for the function getCosmoParameterFileName, sets the correct order of the directories which contain the external input files for the corresponding cosmological parameters.
 Default: $paramsDirectoryNames"
 
 
@@ -606,6 +609,7 @@ Omegac::usage="Protected name of cosmological parameter Omegac"
 omegac::usage="Protected name of cosmological parameter omegac"
 omegab::usage="Protected name of cosmological parameter omegab"
 omegam::usage="Protected name of cosmological parameter omegam"
+
 
 ns::usage="Protected name of cosmological parameter ns"
 As::usage="Protected name of cosmological parameter As (Notice that there are several conventions for As (logAs, 10^9As, ...)"
@@ -734,7 +738,7 @@ setORreadTransformedParameters[parsymb_Symbol,opts:OptionsPattern[]]:=Block[{par
   parval=(First@rulepar)[[2]];
 
   If[SameQ[((First@rulepar)[[1]]), parsymb]==True,
-    Return[parval]  (*In case the user forgot to unset the option transformedParameter, teh function still returns the correct value*)
+    Return[parval]  (*In case the user forgot to unset the option transformedParameter, the function still returns the correct value*)
   ];
   If[(invetra==True || (readbool==True && SameQ[$inverseFuncsOfParameters[posi], None]) ),
     Unset[$funcsOfParameters[posi]];
@@ -885,7 +889,7 @@ $OmegaR = OptionValue[OmegaRadiation];
 $fGamma=getgamma[$paramoptions];
 $hubblereference=OptionValue[hubbleReference]; (*Reference h, when h is a derived parameter and is not included in $paramoptions*)
 $sigma8reference=OptionValue[sigma8reference]; (*Reference sigma8, when sigma8 is a derived parameter and is not included in $paramoptions*)
-$Asreference=OptionValue[Asreference]; (*Reference sigma8, when sigma8 is a derived parameter and is not included in $paramoptions*)
+$Asreference=OptionValue[Asreference]; (*Reference As, when As is a derived parameter and is not included in $paramoptions*)
 $Omegabfixed=OptionValue[OmegabReference];     (*Reference Omegab, when Omegab is a derived parameter and is not included in $paramoptions*)
 $externalH0units=H0u;
 $externalDistanceUnits=D0u;
@@ -1194,17 +1198,26 @@ curvatureSin[x_,ok_]:=Which[ok>.001,Sinh[x],ok<-.001,Sin[x],Abs[ok]<=.001,x];
 
 curvatureFunc=Function[{xi,ki},Limit[Sinh[Sqrt[-k]*xi]/Sqrt[-k],k->ki]];
 
-Options[unity]=$paramoptions;
+(*Options[unity]=$paramoptions;
 unity[opts:OptionsPattern[]]:=Block[{OmR=$OmegaR},
   1 - OmR   (* extra matter species like Omeganu are taken into account in OmegaCDM and OmegaBaryon*)
-]; (*this function returns 1 minus the fixed parameters contributing to energy density. In principle accepts options, but doesn't use them*)
+]; (*this function returns 1 minus the fixed parameters contributing to energy density. In principle accepts options, but doesn't use them*)*)
 
+Options[unity]=$paramoptions;
+unity[opts:OptionsPattern[]]:=Block[{OmR=OmegaR0Today[opts]},
+  1 - OmR];
+
+
+Options[OmegaR0Today]=$paramoptions;
+OmegaR0Today[opts:OptionsPattern[]]:=Block[{Omegar0},
+Omegar0=$OmegaR
+];
 
 Options[OmegaBaryon0Today]=$paramoptions;
 OmegaBaryon0Today[opts:OptionsPattern[]]:=Block[{OmegaB0,OmegaC0,OmegaDE0,paropts, hubref, uno},
 paropts=complementParamValues[{opts},OmegaBaryon0Today,returnList->"Full", filterCosmoPars->True];
 hubref=hubbleToday[paropts];
-uno = unity[];
+uno = unity[opts];
 OmegaB0=Which[
   FilterRules[paropts,Omegab]!={},OptionValue[Omegab],
   Length[FilterRules[paropts,{omegab}]]==1,OptionValue[omegab]/(hubref^2),
@@ -1219,7 +1232,7 @@ OmegaB0=Which[
 Options[OmegaCDM0Today]=$paramoptions;
 OmegaCDM0Today[opts:OptionsPattern[]]:=Block[{OmegaC0,paropts, hubref, OmegaB0, OmegaDE0, uno},
 paropts=complementParamValues[{opts},OmegaCDM0Today,returnList->"Full", filterCosmoPars->True];
-uno = unity[];
+uno = unity[opts];
 hubref=hubbleToday[paropts];
 OmegaB0=OmegaBaryon0Today[paropts];
 OmegaC0=Which[
@@ -1239,7 +1252,7 @@ OmegaC0=Which[
 Options[OmegaDE0Today]=$paramoptions;
 OmegaDE0Today[opts:OptionsPattern[]]:=Block[{OmegaC0,paropts, hubref, OmegaB0, OmegaM0,OmegaDE0, uno},
 paropts=complementParamValues[{opts},OmegaDE0Today,returnList->"Full", filterCosmoPars->True];
-uno = unity[];
+uno = unity[opts];
 hubref=hubbleToday[paropts];
 OmegaM0=OmegaM0Today[paropts];
 OmegaDE0=Which[
@@ -1252,16 +1265,14 @@ OmegaDE0=Which[
 Options[OmegaM0Today]=$paramoptions;
 OmegaM0Today[opts:OptionsPattern[]]:=Block[{OmegaM0,hubref,OmegaDE0, OmegaC0, OmegaB0,paropts, uno},
 paropts=complementParamValues[{opts},OmegaM0Today,returnList->"Full", filterCosmoPars->True];
-uno = unity[];
-OmegaB0=OmegaBaryon0Today[paropts];
-hubref=hubbleToday[paropts];
-OmegaC0=OmegaCDM0Today[paropts];
+uno = unity[opts];
+
 (*If[OmegaM0!=(OmegaB0+OmegaC0+$Omeganu), Print["Omegam0 does not match Omegab0, Omegac0 and Omeganu0"; Abort[]]];*)
 OmegaM0=Which[
   FilterRules[paropts,Omegam]!={}, OptionValue[Omegam],
-  Length[FilterRules[paropts,{omegam, hubble}]]==2,(OptionValue[omegam])/(hubref^2),
+  Length[FilterRules[paropts,hubref=hubbleToday[paropts];{omegam, hubble}]]==2,(OptionValue[omegam])/(hubref^2),
   Length[FilterRules[paropts,{OmegaDE}]]==1, uno-OptionValue[OmegaDE],
-  True,
+  True,OmegaB0=OmegaBaryon0Today[paropts];OmegaC0=OmegaCDM0Today[paropts];
   OmegaB0+OmegaC0
   ]
 ]
@@ -1270,7 +1281,7 @@ OmegaM0=Which[
 Options[hubbleToday]=$paramoptions;
 hubbleToday[opts:OptionsPattern[]]:=Block[{paropts, hubblevalue, uno},
 paropts=complementParamValues[{opts},hubbleToday,returnList->"Full", filterCosmoPars->True];
-uno = unity[];
+uno = unity[opts];
 hubblevalue=Which[
   FilterRules[paropts,hubble]!={},OptionValue[hubble],
   Length[FilterRules[paropts,{omegam,OmegaDE}]]==2,Sqrt[OptionValue[omegam]/(uno-OptionValue[OmegaDE])],
@@ -1278,7 +1289,6 @@ hubblevalue=Which[
   FilterRules[paropts,hubble]=={},$hubblereference
   ]
 ];
-
 
 
 Options[OmegaK0Today]=$paramoptions;
@@ -1300,7 +1310,7 @@ Return[curv]
 
 
 
-LCDMDimensionlessHubble::flatness="Warning: The sum of the energy density fractions (Omega_i) at z=0 is not 1."
+(*LCDMDimensionlessHubble::flatness="Warning: The sum of the energy density fractions (Omega_i) at z=0 is not 1."
 
 Options[LCDMDimensionlessHubble]=$paramoptions
 LCDMDimensionlessHubble[z_,opts:OptionsPattern[]]:=LCDMDimensionlessHubble[z,opts]=
@@ -1318,7 +1328,14 @@ Omegak=OmegaK0Today[paropts];
 Sqrt[$OmegaR*(1+z)^4 + OmegaB0*(1+z)^3 + OmegaC0*(1+z)^3 + $Omeganu*(1+z)^3 + OmegaDE0*Exp[wDEzFunc[z,w0ref,waref]]+ (Omegak)*(1+z)^2]
 ];
 
-(*Example on how to protect a memoized function*)
+(*Example on how to protect a memoized function*)*)
+
+
+Options[LCDMDimensionlessHubble]=$paramoptions;
+LCDMDimensionlessHubble[z_,opts:OptionsPattern[]]:=LCDMDimensionlessHubble[z,opts]=Block[{paropts},
+paropts=complementParamValues[{opts},LCDMDimensionlessHubble,returnList->"Complement", filterCosmoPars->True];
+Quintessence`dimensionlessHubbleWrtN[NfOfz[z],paropts]
+];
 
 
 (*ClearAll[withCodeAfter];*)
@@ -1791,7 +1808,6 @@ Asvalue=Which[
 ]
 
 
-
 Options[extdGNDSolv]=$paramoptions~Join~$modcosmoopt
 
 
@@ -1820,9 +1836,9 @@ Exp[growdz[kval][zval]]
 ]
 
 getgamma[opts_]:=Block[{gam, gamrule},
-  gamrule=FilterRules[opts,gamma];
+  gamrule=FilterRules[opts,gammaGrowth];
   gam=If[gamrule!={} ,
-    gamma/.gamrule
+    gammaGrowth/.gamrule
     ,
     $fGamma
   ];
@@ -1892,7 +1908,7 @@ If[inpunumder==True,
 returnfunc=(externalFunctionTaylor[zval,kval, cosmopts~Join~{
                         externalFunction->$externalGrowthInterpolatingFunction,
                         externalDerivativeFunction->$externalGrowthDerivativesInterpolatingFunction,
-                        interpolatedArguments->"zk", kdependence->kdep}])
+                        interpolatedArguments->"z", kdependence->kdep}])
 , (*ELSE*)
 If[OptionValue[shiftedDomain]==True && kdep==False, zdom=$externalGrowthInterpolatingFunction[filename]["Domain"][[1,1]]];
 If[OptionValue[normalizeGrowth]==True,
@@ -1922,7 +1938,7 @@ If[inpunumder==True,
 returnfunc=(externalFunctionTaylor[zval,kval, cosmopts~Join~{
                         externalFunction->$externalGrowthRateInterpolatingFunction,
                         externalDerivativeFunction->$externalGrowthRateDerivativesInterpolatingFunction,
-                        interpolatedArguments->"zk", kdependence->kdep}])
+                        interpolatedArguments->"z", kdependence->kdep}])
 , (*ELSE*)
 If[OptionValue[shiftedDomain]==True && kdep==False,
 zdom=$externalGrowthRateInterpolatingFunction[filename]["Domain"][[1,1]]
@@ -1947,7 +1963,7 @@ Options[fGrowthRate]=$paramoptions~Join~$modcosmoopt~Join~{growthDerivative->Fal
   externalFile->False, kdependentGrowth:>$kdependentGrowth,
 fixGrowthScalek:>$fkfix, fGammaFit->$fGamma, solveDifferentialEquation -> False}
 (*added memoization of fGrowthRate*)
-fGrowthRate[zk__?NumericQ,opts:OptionsPattern[]]:=fGrowthRate[zk,opts]=Block[{lcdmOpt,paropts, fromDeriv,kdep, zval,
+fGrowthRate[zk__,opts:OptionsPattern[]]:=fGrowthRate[zk,opts]=Block[{lcdmOpt,paropts, fromDeriv,kdep, zval,
   kval, kscale, kuf, puf, return, gamma, solveND},
 paropts=complementParamValues[{opts},fGrowthRate,returnList->"Complement", filterCosmoPars->True];
 lcdmOpt=OptionValue[lcdmBool];
@@ -2630,21 +2646,34 @@ psKfunc=Interpolation[psTemp, InterpolationOrder->3, Method->"Spline"]
 
 ];
 
+
 powerSpectrum::extopts="Inconsistent options chosen, lcdmBool=False, but externalFile has not been defined. Switching to lcdm=True."
 
 Options[powerSpectrum]=$paramoptions~Join~$pscosmoopts~Join~{spectrumMethod->"Transfer", sigma8reference->$sigma8reference,
-  externalFile->False, kdependentGrowth:>$kdependentGrowth, units:>$internalPkUnits}
+  externalFile->False, kdependentGrowth->$kdependentGrowth, units:>$internalPkUnits, nonlinearBool->False}
 
-powerSpectrum[z_?NumericQ,k_?NumericQ,opts:OptionsPattern[]]:=
-powerSpectrum[z,k,opts]=
-Block[{paropts, psmethod, extfile, s8, hvalue, unitsPk,
-  lcdmOpt, parcosmopts, kuf, puf, pk},
+powerSpectrum[z_?NumericQ,k_,opts:OptionsPattern[]]:=(*powerSpectrum[z,k,opts]=*)Block[{paropts, psmethod, extfile, s8, hvalue, unitsPk,
+  lcdmOpt, parcosmopts, kuf, puf, pk, nonlinearOpt, krange,nonlinearPowerSpectrum,OmegaM0,OmegaL},
 
 paropts=complementParamValues[{opts},powerSpectrum, returnList->"Complement"];
 parcosmopts=complementParamValues[{opts},powerSpectrum, returnList->"Full", filterCosmoPars->True];
 psmethod=OptionValue[spectrumMethod];
 extfile=OptionValue[externalFile];
 lcdmOpt=OptionValue[lcdmBool];  (*lcdmBool option, controls if lcdm internal power spectra are being used*)
+nonlinearOpt=OptionValue[nonlinearBool];
+OmegaM0=OmegaM0Today[parcosmopts];
+OmegaL=OmegaDE0Today[parcosmopts];
+
+If[nonlinearOpt==True,
+krange=logarithmicDivisions[{1*^-4,1},1000];
+nonlinearPowerSpectrum[z,k]:=Block[{hfCorrection,psTable,interpolatedNLpowerSpec},
+psTable=Transpose@{krange,powerSpectrum[z,krange,paropts,nonlinearBool->False]};
+hfCorrection=HaloFitCorrection[psTable,OmegaM0,OmegaL];
+interpolatedNLpowerSpec=Interpolation@hfCorrection;
+interpolatedNLpowerSpec[k]
+];
+Return@nonlinearPowerSpectrum[z,k],
+
 
 If[
   (extfile==False && lcdmOpt==False),
@@ -2681,6 +2710,7 @@ Which[
     pk=If[$pks8ratio==1, (*external pk is given as pk/s8^2 *) pk*(sigma8ofZ[z,FilterRules[paropts, Options@sigma8ofZ]])^2, (*external pk is matter power spectrum pk*) pk]
   ];
   Return[pk]
+];
 ];
 
 
@@ -2989,8 +3019,7 @@ zoptis=If[$shaParVarInZdep==False, fidoptis, paroptis];
 
 variationOfzdependentQuantities[dvar, dvarsign, dvarcoeff];
 
-
-debigPrint["Print: d4, d5: "];
+debugPrint["Print: d4, d5: "];
 debugPrint[$vd4[zred], 0];
 debugPrint[$vd5[zred], 0];
 
