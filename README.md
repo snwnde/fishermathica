@@ -12,7 +12,7 @@ This branch was developed during the work behind the publication **Quintessentia
 
 It contains
 - New packages: [Quintessence.wl](Quintessence.wl) and [Jacobian.wl](Jacobian.wl),
-- Adaptation to [CosmologyFunctions.mCosmologyFunctions.m),
+- Adaptation to [CosmologyFunctions.m](CosmologyFunctions.m),
 - Self-contained scripts: [SelfContainedRun](SelfContainedRun/).
 
 By running the code, one can reproduce the Fisher information leading to the reported figures in the publication.
